@@ -9,13 +9,13 @@ import Filter from './components/Filter';
 
 import Title from './components/Title';
 
-import initialContacts from './data/contacts.json';
+// import initialContacts from './data/contacts.json';
 
 import { FormContainer } from './App.styles';
 
 export default class App extends Component {
   state = {
-    contacts: initialContacts,
+    contacts: [],
     filter: '',
   };
 
@@ -58,6 +58,22 @@ export default class App extends Component {
       contact.name.toLowerCase().includes(normalizedFilter),
     );
   };
+
+  componentDidMount() {
+    const savedContacts = localStorage.getItem('contacts');
+
+    const parsedContacts = JSON.parse(savedContacts);
+
+    if (parsedContacts) {
+      this.setState({ contacts: parsedContacts });
+    }
+  }
+
+  componentDidUpdate(_, prevState) {
+    if (this.state.contacts !== prevState.contacts) {
+      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+    }
+  }
 
   render() {
     const { filter } = this.state;
