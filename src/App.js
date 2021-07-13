@@ -1,25 +1,79 @@
-import logo from './logo.svg';
-import './App.css';
+import { Component } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import ContactForm from './components/Form';
+
+import ContactList from './components/ContactList';
+
+import Filter from './components/Filter';
+
+import Title from './components/Title';
+
+import initialContacts from './data/contacts.json';
+
+import { FormContainer } from './App.styles';
+
+export default class App extends Component {
+  state = {
+    contacts: initialContacts,
+    filter: '',
+  };
+
+  addContact = ({ name, number }) => {
+    if (
+      this.state.contacts.find(
+        contact => contact.name.toLowerCase() === name.toLowerCase(),
+      )
+    ) {
+      alert(`${name} is already in the contact list`);
+      return;
+    }
+    const contact = {
+      id: uuidv4(),
+      name,
+      number,
+    };
+
+    this.setState(({ contacts }) => ({
+      contacts: [contact, ...contacts],
+    }));
+  };
+
+  deleteContact = contactId => {
+    this.setState(prevState => ({
+      contacts: prevState.contacts.filter(contact => contact.id !== contactId),
+    }));
+  };
+
+  changeFilter = e => {
+    this.setState({
+      filter: e.currentTarget.value,
+    });
+  };
+
+  getVisibleContacts = () => {
+    const { contacts, filter } = this.state;
+    const normalizedFilter = filter.toLowerCase();
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(normalizedFilter),
+    );
+  };
+
+  render() {
+    const { filter } = this.state;
+
+    const visibleContacts = this.getVisibleContacts();
+    return (
+      <FormContainer>
+        <Title text={'Phonebook'} />
+        <ContactForm onSubmit={this.addContact} />
+        <Title text={'Contacts'} />
+        <Filter value={filter} onChange={this.changeFilter} />
+        <ContactList
+          contacts={visibleContacts}
+          onDeleteContact={this.deleteContact}
+        />
+      </FormContainer>
+    );
+  }
 }
-
-export default App;
